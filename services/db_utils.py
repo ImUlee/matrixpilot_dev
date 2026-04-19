@@ -141,6 +141,22 @@ def init_lp_db() -> None:
     
     cursor = conn.cursor()
     
+    # 创建日志表（必须先创建表再创建索引）
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            device_id TEXT, 
+            nickname TEXT, 
+            users TEXT, 
+            log_time REAL, 
+            query TEXT, 
+            response TEXT, 
+            tokens INTEGER, 
+            latency REAL,
+            template_id TEXT DEFAULT 'default'
+        )
+    ''')
+    
     # 创建索引
     cursor.execute(
         'CREATE INDEX IF NOT EXISTS idx_logs_time_dev ON logs(log_time, device_id)'

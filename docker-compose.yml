@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  matrixpilotdev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: matrixpilotdev:latest
+    container_name: matrixpilotdev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      # 数据持久化
+      - matrixpilot_db:/app/db
+      - matrixpilot_logs:/app/logs
+      - matrixpilot_files:/app/file
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:5000/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - matrixpilot_network
+
+volumes:
+  matrixpilot_db:
+    name: matrixpilot_db
+  matrixpilot_logs:
+    name: matrixpilot_logs
+  matrixpilot_files:
+    name: matrixpilot_files
+
+networks:
+  matrixpilot_network:
+    name: matrixpilot_network
+    driver: bridge

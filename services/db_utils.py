@@ -153,7 +153,9 @@ def init_lp_db() -> None:
             response TEXT, 
             tokens INTEGER, 
             latency REAL,
-            template_id TEXT DEFAULT 'default'
+            template_id TEXT DEFAULT 'default',
+            item_type TEXT DEFAULT '',
+            quantity INTEGER DEFAULT 0
         )
     ''')
     
@@ -205,7 +207,8 @@ def init_lp_db() -> None:
     })
     ensure_columns(cursor, 'logs', {
         'template_id': "TEXT DEFAULT 'default'",
-        'item_type': "TEXT DEFAULT ''"
+        'item_type': "TEXT DEFAULT ''",
+        'quantity': "INTEGER DEFAULT 0"
     })
     
     # 修复旧表主键结构（如果需要）

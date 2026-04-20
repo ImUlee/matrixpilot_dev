@@ -17,6 +17,7 @@ from models import Settings, Record
 from services.db_utils import init_mp_db, init_lp_db
 from routes import register_blueprints
 from constants import BarkSound, BarkGroup
+from self_check import require_self_check
 
 
 def setup_logging(app):
@@ -132,6 +133,9 @@ def create_app():
     # 2. 配置日志
     setup_logging(app)
     app.logger.info("MatrixPilot 启动中...")
+    
+    # 2.1 启动自检
+    require_self_check()
 
     # 3. 初始化插件
     db.init_app(app)

@@ -134,7 +134,7 @@ def create_app():
     app = Flask(
         __name__,
         static_folder=str(base_dir / 'static' / 'dist'),
-        static_url_path='/static'
+        static_url_path='/'  # 根路径，这样 /manifest.json 等可访问
     )
     app.config.from_object(Config)
 

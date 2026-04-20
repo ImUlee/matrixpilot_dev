@@ -83,14 +83,4 @@ def check_auth():
     return jsonify({'logged_in': session.get('logged_in', False)})
 
 
-# 根路径返回 SPA 入口（静态文件由 Flask 自动服务）
-@auth_bp.route('/')
-def serve_index():
-    """服务首页"""
-    from flask import send_from_directory
-    import pathlib
-    static_dist = pathlib.Path(__file__).parent.parent / 'static' / 'dist'
-    return send_from_directory(static_dist, 'index.html')
-
-
-# 注意：/manifest.json, /icon-*.png 等静态文件由 Flask 的 static_folder 自动服务
+# 注意：/manifest.json, /icon-*.png 等静态文件由 Flask 的 static 自动服务（static_url_path='/'）

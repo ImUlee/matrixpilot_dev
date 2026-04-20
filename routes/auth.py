@@ -83,12 +83,14 @@ def check_auth():
     return jsonify({'logged_in': session.get('logged_in', False)})
 
 
+# 根路径返回 SPA 入口（静态文件由 Flask 自动服务）
 @auth_bp.route('/')
-@auth_bp.route('/<path:path>')
-def serve_spa(path=None):
-    """服务前端 SPA
-    
-    捕获所有未匹配路由，返回 Vue SPA 入口
-    实现前端路由支持
-    """
-    return send_from_directory('static/dist', 'index.html')
+def serve_index():
+    """服务首页"""
+    from flask import send_from_directory
+    import pathlib
+    static_dist = pathlib.Path(__file__).parent.parent / 'static' / 'dist'
+    return send_from_directory(static_dist, 'index.html')
+
+
+# 注意：/manifest.json, /icon-*.png 等静态文件由 Flask 的 static_folder 自动服务

@@ -4,6 +4,7 @@ MatrixPilot 启动自检模块
 在服务启动前验证所有组件是否正常
 """
 import os
+import socket
 import sqlite3
 import sys
 from pathlib import Path
@@ -108,7 +109,6 @@ def run_self_check():
                 errors.append(f"❌ 数据库错误 {db_path.name}: {e}")
     
     # 7. 检查端口可用性
-    import socket
     test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     port_available = test_socket.connect_ex(('127.0.0.1', 5000)) != 0
     test_socket.close()
@@ -149,7 +149,6 @@ def require_self_check():
     passed, errors = run_self_check()
     if not passed:
         print("\n❌ 启动失败！请修复上述问题后重试。")
-        import sys
         sys.exit(1)
 
 

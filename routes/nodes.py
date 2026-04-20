@@ -11,6 +11,19 @@ from constants import Message
 nodes_bp = Blueprint('nodes', __name__)
 
 
+# 兼容路由：前端调用 /api/nodes，后端提供 /api/manage_nodes
+@nodes_bp.route('/api/nodes', methods=['GET'])
+@login_required
+def nodes_list():
+    """节点列表兼容接口
+    
+    前端调用的路由，后端实际指向 manage_nodes
+    """
+    conn = get_lp_db()
+    c = conn.cursor()
+    return _get_nodes_list(c)
+
+
 @nodes_bp.route('/api/manage_nodes', methods=['GET', 'POST'])
 @login_required
 def manage_nodes():

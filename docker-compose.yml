@@ -5,14 +5,15 @@ services:
     image: leeone/matrixpilotdev:latest
     container_name: matrixpilotdev
     restart: unless-stopped
+    network_mode: bridge
     ports:
-      - "6000:5000"
+      - "6600:5000"
     env_file:
       - .env
     volumes:
-      - matrixpilot_db:/app/db
-      - matrixpilot_logs:/app/logs
-      - matrixpilot_files:/app/file
+      - ./db:/app/db
+      - ./logs:/app/logs
+      - ./files:/app/file
     environment:
       - TZ=Asia/Shanghai
     healthcheck:

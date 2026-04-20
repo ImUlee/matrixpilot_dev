@@ -65,9 +65,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Frontend build (generated)
-frontend/dist/
-static/dist/assets/
+# Frontend build (generated) - 已在 Docker 内重新构建，不需要排除
+# frontend/dist/
 
 # Backup files
 backup/

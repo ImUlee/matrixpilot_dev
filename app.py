@@ -126,8 +126,16 @@ def create_app():
     Returns:
         配置完成的Flask应用
     """
-    # 1. 实例化核心
-    app = Flask(__name__)
+    # 获取项目根目录
+    import pathlib
+    base_dir = pathlib.Path(__file__).parent.resolve()
+    
+    # 1. 实例化核心 - 配置静态文件路径
+    app = Flask(
+        __name__,
+        static_folder=str(base_dir / 'static' / 'dist'),
+        static_url_path='/static'
+    )
     app.config.from_object(Config)
 
     # 2. 配置日志

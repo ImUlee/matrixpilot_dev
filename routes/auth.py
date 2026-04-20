@@ -81,3 +81,14 @@ def check_auth():
     返回当前用户的登录状态
     """
     return jsonify({'logged_in': session.get('logged_in', False)})
+
+
+@auth_bp.route('/')
+@auth_bp.route('/<path:path>')
+def serve_spa(path=None):
+    """服务前端 SPA
+    
+    捕获所有未匹配路由，返回 Vue SPA 入口
+    实现前端路由支持
+    """
+    return send_from_directory('static/dist', 'index.html')

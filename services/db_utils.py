@@ -203,7 +203,10 @@ def init_lp_db() -> None:
         'last_msg': f"TEXT DEFAULT '{DeviceStatus.NORMAL.value}'",
         'detected_template': "TEXT DEFAULT ''"
     })
-    ensure_columns(cursor, 'logs', {'template_id': "TEXT DEFAULT 'default'"})
+    ensure_columns(cursor, 'logs', {
+        'template_id': "TEXT DEFAULT 'default'",
+        'item_type': "TEXT DEFAULT ''"
+    })
     
     # 修复旧表主键结构（如果需要）
     cursor.execute("PRAGMA table_info(daily_overrides)")

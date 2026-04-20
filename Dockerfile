@@ -18,7 +18,7 @@ RUN npm ci
 COPY frontend/ ./
 
 # 构建
-RUN npm run build
+RUN npm run build && ls -la /app/static/dist/
 
 # ============================================
 # Stage 2: Python 运行环境
@@ -54,6 +54,9 @@ COPY --chown=app:app . .
 # 复制前端构建产物
 COPY --from=frontend-builder --chown=app:app /app/static/dist ./static/dist
 
+# 验证文件是否存在
+RUN ls -la /app/static/dist/ && ls -la /app/static/dist/assets/
+
 # 创建必要目录
 RUN mkdir -p db logs file \
     && chown -R app:app db logs file
@@ -65,7 +68,7 @@ USER app
 EXPOSE 5000
 
 # 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:5000/health')" || exit 1
 
 # 启动命令

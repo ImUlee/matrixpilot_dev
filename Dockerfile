@@ -71,5 +71,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:5000/health')" || exit 1
 
-# 启动命令
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "app:app"]
+# 启动命令 - 使用单个 worker 避免重复自检
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "app:app"]

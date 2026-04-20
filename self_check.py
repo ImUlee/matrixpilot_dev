@@ -5,12 +5,20 @@ MatrixPilot 启动自检模块
 """
 import os
 import sqlite3
+import sys
 from pathlib import Path
+
+# 自检标记文件 - 确保只在主进程执行一次
+_self_check_done_file = '/tmp/matrixpilot_self_check.done'
 
 
 def run_self_check():
     """运行自检，返回 (是否通过, 错误信息列表)"""
     errors = []
+    
+    # 检查是否已经执行过自检（避免重复）
+    if os.path.exists(_self_check_done_file):
+        return True, []
     
     print("=" * 50)
     print("🔍 MatrixPilot 自检中...")
@@ -35,9 +43,13 @@ def run_self_check():
         if path.exists():
             print(f"✅ {name}: {path}")
         else:
-            errors.append(f"❌ 缺失: {name} -> {path}")
+            # templates 目录可能不需要，如果是前后端分离
+            if name != 'templates':
+                errors.append(f"❌ 缺失: {name} -> {path}")
+            else:
+                print(f"⚠️  templates: {path} (可选，前后端分离项目)")
     
-    # 3. 检查静态文件
+    # 3. 检查静态文件（最重要！）
     static_dist = app_dir / 'static' / 'dist'
     if static_dist.exists():
         print(f"✅ 静态文件目录: {static_dist}")
@@ -47,7 +59,7 @@ def run_self_check():
         if index_html.exists():
             print(f"✅ index.html 存在 ({index_html.stat().st_size} bytes)")
         else:
-            errors.append(f"❌ 缺失 index.html")
+            errors.append(f"❌ 缺失 index.html - 请检查前端是否正确构建")
         
         # 检查 assets 目录
         assets_dir = static_dist / 'assets'
@@ -57,13 +69,13 @@ def run_self_check():
             print(f"✅ 静态资源: {len(js_files)} JS, {len(css_files)} CSS")
             
             if not js_files:
-                errors.append("❌ 没有找到 JS 文件")
+                errors.append("❌ 没有找到 JS 文件 - 前端构建可能失败")
             if not css_files:
-                errors.append("❌ 没有找到 CSS 文件")
+                errors.append("❌ 没有找到 CSS 文件 - 前端构建可能失败")
         else:
-            errors.append(f"❌ 缺失 assets 目录")
+            errors.append(f"❌ 缺失 assets 目录 - 前端构建可能失败")
     else:
-        errors.append(f"❌ 缺失 static/dist 目录")
+        errors.append(f"❌ 缺失 static/dist 目录 - 前端未构建或构建产物未复制到镜像")
     
     # 4. 检查数据库目录
     db_dir = app_dir / 'db'
@@ -114,6 +126,12 @@ def run_self_check():
             print(f"   {error}")
     else:
         print("✅ 自检通过！所有组件正常")
+        # 写入标记文件，避免重复自检
+        try:
+            with open(_self_check_done_file, 'w') as f:
+                f.write('ok')
+        except:
+            pass
     print("=" * 50)
     
     return len(errors) == 0, errors
@@ -121,6 +139,13 @@ def run_self_check():
 
 def require_self_check():
     """强制自检，如果失败则退出程序"""
+    # 检查是否是 gunicorn master 进程（不需要自检）
+    if 'gunicorn' in sys.argv[0] or os.environ.get('GUNICORN_PID'):
+        # 检查是否在 worker 进程中
+        if os.environ.get('GUNICORN_WORKER'):
+            # worker 进程跳过自检
+            return
+    
     passed, errors = run_self_check()
     if not passed:
         print("\n❌ 启动失败！请修复上述问题后重试。")
